@@ -21,7 +21,13 @@ class cic():
         """translates coordinates from GPS-format to the special CIC format"""
         pass
 
-
+    def send_coordinate(self,lat,long,tracker_id):
+        #potional parameters? precicion, timestamp
+        pass
+        
+    def send_ping(self,tracker_id):
+        #an idea is to fit the trrackers with a button to send a "ping" to get the attention of a cic opperator
+        pass
 
 if __name__ == "__main__":
     print("testing connection")
