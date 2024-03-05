@@ -42,7 +42,7 @@ class mapping():
             print(item[1][-1])
             self.update_position(item[1][-1])
             self.draw_historic_path(device_id=item[1][-1]['device_id'],last=20)
-        m.draw_map()
+        self.draw_map()
         
     def open_map(self):
         webbrowser.open(self.map_filename, new=2)#opens new tab
@@ -63,15 +63,25 @@ class mapping():
         """adds a new marker to the map"""
         
         device_id=position_dict["device_id"]
-        gps_time=position_dict["gps_time"]
+        try:
+            tooltip_time=position_dict["timestamp_date"]
+        except:
+            tooltip_time=position_dict["gps_date"]
         latitude=position_dict["latitude"]
         longitude=position_dict["longitude"]
         
         tooltip = 'device_id: %s'%device_id
-        popup='<i>Details: \n Device %s \ngps timestamp %s</i>'%(device_id,gps_time)
+        popup='<i>Details: \n Device %s \ngps timestamp %s</i>'%(device_id,tooltip_time)
         icon_color=self.icon_color_by_id(device_id)
         icon_symbol=self.icon_symbol_by_id(device_id)
         folium.Marker([latitude, longitude], popup=popup, tooltip=tooltip,icon=folium.Icon(color='lightgreen',icon_color=icon_color, icon=icon_symbol,prefix='fa',angle=0)).add_to(self.m)
+        try:
+            #radius=position_dict["HDOP"]/100*2.5 # positionen die komplett daneben liegen haben trotzdem einen kleinen wert
+            radius=position_dict["PDOP"]/10
+            #radius=1000/pow(position_dict["satsInView"],2)
+            folium.Circle([latitude, longitude],radius=radius, fill_color=icon_color, fill_opacity=0.1, color=icon_color, weight=1).add_to(self.m)
+        except:
+            print("no precicion")
         #UserWarning: color argument of Icon should be one of: {'purple', 'pink', 'green', 'darkred', 'darkgreen', 'lightred', 'lightgray', 'lightgreen', 'darkblue', 'black', 'orange', 'blue', 'darkpurple', 'red', 'cadetblue', 'beige', 'white', 'lightblue', 'gray'}.
     
     def icon_color_by_id(self,device_id):
@@ -192,7 +202,7 @@ if __name__ == "__main__":
         for nr in range(nr_of_trackers):
             pos_list[nr]["latitude1"]=pos_list[nr]["latitude1"]+(0.5-random.random())/10
             pos_list[nr]["longitudel"]=pos_list[nr]["longitudel"]+(0.5-random.random())/10
-            position_dict1={"device_id":nr,"latitude":pos_list[nr]["latitude1"],"longitude":pos_list[nr]["longitudel"],"gps_time":tick}
+            position_dict1={"device_id":nr,"latitude":pos_list[nr]["latitude1"],"longitude":pos_list[nr]["longitudel"],"gps_time":tick,"gps_date":1}
             m.update_position(position_dict1)
             m.draw_path(position_dict1)
         m.draw_map()
