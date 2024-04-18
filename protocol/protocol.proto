@@ -1,0 +1,40 @@
+// A very simple protocol definition, consisting of only
+// one message.
+
+syntax = "proto3";
+import "nanopb.proto";
+
+message Request {
+    oneof request {
+        SetRldInfo.Request set_rld_info = 1;
+    }
+}
+
+message Response {
+    oneof response {
+        SetRldInfo.Response set_rld_info = 1;
+    }
+}
+
+message RldMessage {
+    string id = 1 [(nanopb).max_size = 37, (nanopb).fixed_length = true];
+
+    oneof message{
+        Request request = 2;
+        Response response = 3;
+    }
+}
+
+message RldInfo {
+    int32 id = 1;
+    int32 flags = 2;
+    int32 px = 3;
+    int32 py = 4;
+}
+
+message SetRldInfo {
+    message Response {}
+    message Request {
+        RldInfo info = 1;
+    }
+}
