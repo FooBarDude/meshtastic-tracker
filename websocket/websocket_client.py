@@ -29,10 +29,14 @@ class WsClient(Thread):
         self.ioloop.start()
 
     def emit(self, event: str, message):
-        self.ws.write_message(json.dumps({"event":event, "data":message}))
+        if (self.connected):
+            self.ws.write_message(json.dumps({"event":event, "data":message}))
+        else:
+            print("Websocket not connected")
 
     def close(self):
-        self.ws.close()
+        if self.ws is not None:
+            self.ws.close()
 
     @gen.coroutine
     def _connect_ws(self):

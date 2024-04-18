@@ -1,1 +1,1 @@
-from .websocker_client import WsClient
+from .websocket_client import WsClient
