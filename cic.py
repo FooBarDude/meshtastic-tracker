@@ -1,32 +1,29 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+from websocket import WsClient
 
 """die schnitstelle zum CIC"""
 
-import websocket
-import time
-
-
+import numpy as np
 
 class cic():
     def __init__(self):
-        self.ws = websocket.WebSocket()
+        self.origin = {"lat": 52.382864, "lon": 11.818967}
+        self.scaler = np.cos(self.origin["lat"] * np.pi / 180) * 111300
+
+        self.ws_client = WsClient("ws://echo.websocket.events")
     
     def connect(self):
-        self.ws.connect("ws://echo.websocket.events")
-        self.ws.send("Hello, Server")
-        print(ws.recv())
-        self.ws.close()
+        self.ws_client.start()
         
-    def close_connection(self):
-        #TODO: unsure if a continious connection should be used, or if it shold be opend and closed on every update
-        ws.close()
+    # def close_connection(self):
+    #     self.ws_client.
 
-    def coordinate_translation(self,lat,long):
+    def coordinate_translation(self, lat, lon):
         """translates coordinates from GPS-format to the special CIC format"""
-        x=0 #TODO: actualy caltulate
-        y=0 #TODO: actualy caltulate
-        return x,y
+        y = (self.origin["lat"] - lat) * 111300
+        x = (lon - self.origin["lon"]) * self.scaler
+        return x, y
 
     def position_distortion(self,x,y):
         #in Ingame logic the position sholdnt be as precice as it is from the GPS. this function adds a random distortion (dependent on the distance) to the position

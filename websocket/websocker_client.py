@@ -31,6 +31,9 @@ class WsClient(Thread):
     def emit(self, event: str, message):
         self.ws.write_message(json.dumps({"event":event, "data":message}))
 
+    def close(self):
+        self.ws.close()
+
     @gen.coroutine
     def _connect_ws(self):
         try:
