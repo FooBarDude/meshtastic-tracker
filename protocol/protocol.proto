@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+message Request {
+    oneof request {
+       SetTracker.Request set_tracker = 1;
+    }
+}
+
+message Response {
+    oneof response {
+       SetTracker.Response set_tracker = 1;
+    }
+}
+
+message RldNodeMessage {
+    string id = 1;
+
+    oneof message{
+        Request request = 2;
+        Response response = 3;
+    }
+}
+
+message Position {
+    int32 x = 1;
+    int32 y = 2;
+}
+
+message Tracker {
+    int32 id = 1;
+    Position postion = 2;
+}
+
+message SetTracker {
+    message Request {
+        Tracker tracker = 1;
+    }
+
+    message Response {}
+
+    oneof message {
+        Request request = 1;
+        Response response = 2;
+        string error = 3;
+    }
+}

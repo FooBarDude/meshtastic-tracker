@@ -1,40 +1,47 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+import numpy as np
+
+from protocol import RldNodeMessage, Request
+from uuid import uuid4
+from protocol.protocol import SetTrackerRequest
+from websocket import WsClient
 
 """die schnitstelle zum CIC"""
 
-import websocket
-import time
 
-
-
-class cic():
+class Cic():
     def __init__(self):
-        self.ws = websocket.WebSocket()
+        self.origin = {"lat": 52.382864, "lon": 11.818967}
+        self.scaler = np.cos(self.origin["lat"] * np.pi / 180) * 111300
+
+        self.ws_client = WsClient("ws://echo.websocket.events")
     
     def connect(self):
-        self.ws.connect("ws://echo.websocket.events")
-        self.ws.send("Hello, Server")
-        print(ws.recv())
-        self.ws.close()
+        self.ws_client.start()
         
     def close_connection(self):
-        #TODO: unsure if a continious connection should be used, or if it shold be opend and closed on every update
-        ws.close()
+        self.ws_client.close()
 
-    def coordinate_translation(self,lat,long):
+    def coordinate_translation(self, lat, lon):
         """translates coordinates from GPS-format to the special CIC format"""
-        x=0 #TODO: actualy caltulate
-        y=0 #TODO: actualy caltulate
-        return x,y
+        y = (self.origin["lat"] - lat) * 111300
+        x = (lon - self.origin["lon"]) * self.scaler
+        return x, y
 
     def position_distortion(self,x,y):
         #in Ingame logic the position sholdnt be as precice as it is from the GPS. this function adds a random distortion (dependent on the distance) to the position
         pass
 
-    def send_coordinate(self,x,y,tracker_id,freund_feind):
-        #potional parameters? precicion, timestamp
-        pass
+    def send_coordinate(self, lat, lon, tracker_id):
+        x, y = self.coordinate_translation(lat, lon)
+        msg = RldNodeMessage(id=str(uuid4()))
+        msg.request = SetTrackerRequest()
+        msg.request.tracker.id = tracker_id
+        msg.request.tracker.postion.x = x
+        msg.request.tracker.postion.y = y
+
+        self.ws_client.emit("msg", msg.to_json())
     
     def onRecive_coordinate(self):
         #the cic can also send coordinates from other systems. 
@@ -46,10 +53,9 @@ class cic():
 
 if __name__ == "__main__":
     print("testing connection")
-    cic=cic()
+    cic=Cic()
     cic.connect()
-    x,y=cic.send_coordinate(lat=52.37604,long=11.81999)#should be arround 0/0 of the CIC grid system
-    cic.send_coordinate(x,y,tracker_id=0)
+    cic.send_coordinate(lat=52.37604, lon=11.81999, tracker_id=0)
     cic.send_ping(tracker_id=0)
-    cic.close()
+    cic.close_connection()
     print("finished")
