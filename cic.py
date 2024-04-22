@@ -15,7 +15,8 @@ class Cic():
         self.origin = {"lat": 52.382864, "lon": 11.818967}
         self.scaler = np.cos(self.origin["lat"] * np.pi / 180) * 111300
 
-        self.ws_client = WsClient("ws://echo.websocket.events")
+        #self.ws_client = WsClient("ws://echo.websocket.events")
+        self.ws_client = WsClient("ws://yavin-iv.ddnss.de:3100")
     
     def connect(self):
         self.ws_client.start()
@@ -32,15 +33,21 @@ class Cic():
     def position_distortion(self,x,y):
         #in Ingame logic the position sholdnt be as precice as it is from the GPS. this function adds a random distortion (dependent on the distance) to the position
         pass
-
+    
     def send_coordinate(self, lat, lon, tracker_id):
         x, y = self.coordinate_translation(lat, lon)
-        msg = RldNodeMessage(id=str(uuid4()))
+        msg = RldNodeMessage()
+        msg.id = str(uuid4())
         msg.request = SetTrackerRequest()
-        msg.request.tracker.id = tracker_id
-        msg.request.tracker.postion.x = x
-        msg.request.tracker.postion.y = y
+        #msg.request.tracker = Tracker()
 
+        msg = msg.to_dict()
+        #print("msg",msg)
+        #msg["request"]["setTracker"] = {"tracker": {"id": tracker_id, "postion": {"x": int(x), "y": int(y)}}}
+        msg = {"request": {"setTracker":  {"tracker": {"id": tracker_id, "postion": {"x": int(x), "y": int(y)}}}}}
+
+        _msg = RldNodeMessage()
+        msg = _msg.from_dict(msg)
         self.ws_client.emit("msg", msg.to_json())
     
     def onRecive_coordinate(self):

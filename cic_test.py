@@ -63,6 +63,9 @@ class tests():
                 m.recreate_map()
             time.sleep(5)
 
+    def grid_test(self):
+        """testet bekannte punkte um zu testen ob die gridumrechnung stimmt"""
+        
 
 if __name__ == "__main__":
     print("cic_test.py started")
