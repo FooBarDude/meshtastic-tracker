@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""a programm to track mestastic nodes"""
+"""a programm to record and display mestastic nodes"""
 
 import radio
 import mapping
